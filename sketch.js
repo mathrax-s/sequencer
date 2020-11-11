@@ -46,7 +46,7 @@ function setup() {
 		osc[i] = new p5.Oscillator('sine');
 		osc[i].freq(440);
 		env[i] = new p5.Envelope();
-    env[i].setADSR(0.01, 0.1, 0.2, 0.25);
+    env[i].setADSR(0.01, 0.1, 0.2, 0.5);
     env[i].setRange(0.5, 0.0);
 
     note[i] = 72 + (onkai[i%5]) + (parseInt(i/5) * 12);
