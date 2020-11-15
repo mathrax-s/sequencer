@@ -10,6 +10,8 @@ let frq =[];
 let amp =[];
 let snw =[];
 let data ="";
+let last_timer = 0;
+let t = 0;
 
 let queryString = window.location.search;
 let queryObject = new Object();
@@ -62,35 +64,39 @@ function draw() {
   for(let y=0; y<8; y++){
     for(let x=0; x<16; x++){
       btn[y*16+x].display(mouseX, mouseY);
+      snw[y*16+x].display();
 
       if(x === seq_x){
         btn[y*16+x].check_play(7-y);
+        if(btn[y*16+x].st==1){
+          snw[y*16+x].start();
+        }
       }
     }
   }
-
-  stroke(100);
+  t*=0.99;
+  stroke(100,100,100,100*t);
   strokeWeight(4);
 	line(seq_x*(w/16)+(w/16)/2, 0, seq_x*(w/16)+(w/16)/2,height);
-	
-	if(frameCount%15==0){
+  
+  let now_timer = millis();
+	if(now_timer>= last_timer+250){
 		seq_x ++;
 		if(seq_x>=16){
       seq_x=0;
       for(let y=0; y<8; y++){
         for(let x=0; x<16;x++){
           btn[y*16+x].reset_st();
-          snw[y*16+x].start();
         }
       }
-		}
+    }
+    last_timer = now_timer;
 	}
-	
+  
+  
 	noStroke();
 	fill(255,0,0,100);
   ellipse(mouseX,mouseY,10,10);
-
-
   
   fill(255);
   text(data,w/2,h/2);
@@ -100,28 +106,47 @@ function mousePressed(){
 	for(let y=0; y<8; y++){
     for(let x=0; x<16;x++){
 			if(btn[y*16+x].click(mouseX, mouseY)){
-        btn[y*16+x].change_color(color(200,100,150));
+        btn[y*16+x].change_color(200,100,150);
 			}else{
-				btn[y*16+x].change_color(color(10,100,50));
+				btn[y*16+x].change_color(10,100,150);
 			}
 		}
   }
+}
+function mouseMoved(){
+	for(let y=0; y<8; y++){
+    for(let x=0; x<16;x++){
+				btn[y*16+x].t = 1.0;
+		}
+  }
+  t=1.0;
 }
 
 class Snow {
   constructor(x_,y_){
     this.x = x_;
     this.y = y_;
-    this.s = 1.0;
+    this.s = 0;
+    this.st = 0;
   }
-
   start(){
-    this.s = 1.0;
+    if(this.st==0){
+      this.s = random();
+      this.st = 1;
+    }
   }
   display(){
+    angleMode(DEGREES);
     this.s *= 0.99;
-    fill(255,255,255,255*s);
-    ellipse(this.x,this.y,100);
+    if(this.s<0.1)this.st = 0;
+    push();
+    translate(this.x,this.y);
+    // scale(this.s);
+    rotate(720*this.s);
+    noStroke();
+    fill(255,255,255,255*this.s);
+    ellipse(20,0,200*(this.s),10*(this.s));
+    pop();
   }
 }
 
@@ -134,6 +159,10 @@ class Button {
     this.col = color(10,100,50);
     this.play = 0;
     this.f = 0;
+    this.red = 10;
+    this.grn = 100;
+    this.blu = 150;
+    this.t = 0;
   }
 
   contains(mx, my) {
@@ -153,8 +182,10 @@ class Button {
   reset_st(){
     this.play = 0;
   }
-  change_color(col){
-	  this.col = col;
+  change_color(r,g,b){
+    this.red = r;
+    this.grn = g;
+    this.blu = b;
   }
 
   set_onkai(nt){
@@ -181,8 +212,9 @@ class Button {
 		  stroke(255);
 	  } else {
 		  noStroke();
-	  }
-	  fill(this.col);
+    }
+    this.t *= 0.99;
+    fill(this.red,this.grn,this.blu,100*this.t);
     ellipseMode(RADIUS);
     ellipse(this.x, this.y, this.r, this.r);
   }
